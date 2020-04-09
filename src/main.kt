@@ -45,7 +45,5 @@ fun init(args: Array<String>): Int {
             )
     )
 
-    document.getElementById("markers")?.setAttribute("border-style","solid")
-    document.getElementById("markers")?.setAttribute("border-style","solid")
     return 0
 }
