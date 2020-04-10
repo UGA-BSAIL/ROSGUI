@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>BSAIL ROS GUI</title>
     <script type="text/javascript" src="http://static.robotwebtools.org/threejs/current/three.min.js"></script>
-    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript"
+            src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
     <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
     <script type="text/javascript" src="http://static.robotwebtools.org/ros3djs/current/ros3d.min.js"></script>
     <script type="text/javascript" src="out/production/ROSGUI/lib/kotlin.js"></script>
@@ -12,15 +13,22 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body onload="ROSGUI.init_kand9s$()" bgcolor=#111111>
-    <div id="header">
-        <h1>BSAIL ROS GUI</h1>
-        <h2>A roslibjs project to connect BSAIL robots to the web</h2>
+
+
+<div id="header">
+    <h1>BSAIL ROS GUI</h1>
+    <h2>A roslibjs project to connect BSAIL robots to the web</h2>
+</div>
+
+<div id="map">
+    <div>
+        <button id="connectButton">Connect</button>
     </div>
-    <div id="tooltip"></div>
     <div id="markers" class="border">
-        <div>
-            <button class="connectButton">Connect</button>
-        </div>
+
     </div>
+</div>
+
+
 </body>
 </html>

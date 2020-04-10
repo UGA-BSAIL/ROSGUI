@@ -2,9 +2,15 @@
     border-style : solid;
     border-width: medium;
     border-color: #171717;
+    width: 400px
 }
 
-.connectButton {
+#map {
+    padding-left: 1%;
+    padding-top: 1%;
+}
+
+#connectButton {
     background-color: #2E82FF; /* Blue */
     border: none;
     color: white;
@@ -13,11 +19,18 @@
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    margin-right: 55%;
-    margin-bottom: 100%;
-
 }
-div#markers {
+#connectButton:hover {
+    background-color: #256ee2;
+    color: #EEEEEE;
+}
+
+#connectButton:active {
+    background-color: #1d3c6d;
+    color: #CCCCCC;
+}
+
+div#top {
     /* Align ROS3D window */
     text-align: center;
 }
