@@ -2,7 +2,11 @@
     border-style : solid;
     border-width: medium;
     border-color: #171717;
-    width: 400px
+}
+
+#markers {
+    width: 400px;
+    float: left;
 }
 
 #map {
@@ -10,15 +14,35 @@
     padding-top: 1%;
 }
 
+#user-input {
+    float: left;
+    height: 40px;
+    width: 200px;
+    padding-left: 0.5%
+}
+
+#button-div {
+    height: 100%;
+    width: 208px;
+}
+
+#text-box {
+    height: 100%;
+    width: 100%;
+    resize: none;
+    border: none;
+    padding: 0 0 0 8px;
+}
+
 #connectButton {
     background-color: #2E82FF; /* Blue */
     border: none;
     color: white;
-    padding: 15px 48px;
     text-align: left;
     text-decoration: none;
-    display: inline-block;
     font-size: 16px;
+    height: 100%;
+    width: 100%;
 }
 #connectButton:hover {
     background-color: #256ee2;
