@@ -4,3 +4,39 @@
     border-color: #171717;
 }
 
+.connectButton {
+    background-color: #2E82FF; /* Blue */
+    border: none;
+    color: white;
+    padding: 15px 48px;
+    text-align: left;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-right: 55%;
+    margin-bottom: 100%;
+
+}
+div#markers {
+    /* Align ROS3D window */
+    text-align: center;
+}
+div#header {
+    /* Text Settings */
+    font-family: "Lucida Console", Monaco, monospace;
+    color: white;
+    font-weight: normal;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: normal;
+    text-transform: none;
+    /* Alignment Settings */
+    text-align: center;
+}
+div#header h1 {
+    font-size: 32px;
+}
+div#header h2 {
+    font-size: 16px;
+}
+
