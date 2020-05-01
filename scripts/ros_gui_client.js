@@ -17,6 +17,12 @@ function init() {
     actionName : 'ros_gui_server/OdomCaptureAction'
   });
 
+  var clearMarkersClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : '/ros_gui_server/odom_clear',
+    actionName : 'ros_gui_server/OdomClearAction'
+  });
+
   var odomsub = new ROSLIB.Topic({
     ros : ros,
     name : '/odometry/filtered',
@@ -54,7 +60,7 @@ function init() {
   var urdfClient = new ROS3D.UrdfClient({
     ros : ros,
     tfClient : tfClient,
-    path : 'http://127.0.1.1/',
+    path : 'http://localhost/',
     frameID : '/base_link',
     rootObject : viewer.scene,
     loader : ROS3D.COLLADA_LOADER_2
@@ -93,7 +99,18 @@ function init() {
   // Reconnect Handler
   document.getElementById("connectButton").onclick = function(){
 
-    ros.connect(document.getElementById("url-box").value);
+    var url = document.getElementById("url-box").value;
+
+    ros.connect("ws://" + url + ":9090");
+    
+    urdfClient = new ROS3D.UrdfClient({
+      ros : ros,
+      tfClient : tfClient,
+      path : url,
+      frameID : '/base_link',
+      rootObject : viewer.scene,
+      loader : ROS3D.COLLADA_LOADER_2
+    });
 
   }
 
@@ -115,11 +132,27 @@ function init() {
       console.log('Final Result: ' + result.exit_status);
     });
 
-    goal.on('status', function(status) {
-      console.log('Status: ' + status.status)
+    goal.send()
+  }
+
+  // Clear Markers Handler
+  document.getElementById("clearButton").onclick = function(){
+
+    var goal = new ROSLIB.Goal({
+      actionClient : clearMarkersClient,
+      goalMessage : {
+        delete : true
+      }
+    });
+    
+    goal.on('feedback', function(feedback) {
+      console.log('Feedback: ' + feedback.percent_complete);
+    });
+    
+    goal.on('result', function(result) {
+      console.log('Final Result: ' + result.exit_status);
     });
 
     goal.send()
   }
-
 }
