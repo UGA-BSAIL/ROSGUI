@@ -23,6 +23,12 @@ function init() {
     actionName : 'ros_gui_server/OdomClearAction'
   });
 
+  var moveToMarkersClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : '/ros_gui_server/move_to_markers',
+    actionName : 'ros_gui_server/MoveToMarkersAction'
+  });
+
   var odomsub = new ROSLIB.Topic({
     ros : ros,
     name : '/odometry/filtered',
@@ -155,4 +161,27 @@ function init() {
 
     goal.send()
   }
+
+  // Move to Markers Handler
+  document.getElementById("moveButton").onclick = function(){
+
+    var goal = new ROSLIB.Goal({
+      actionClient : moveToMarkersClient,
+      goalMessage : {
+        move : true
+      }
+    });
+    
+    goal.on('feedback', function(feedback) {
+      console.log('Feedback: ' + feedback.percent_complete);
+    });
+    
+    goal.on('result', function(result) {
+      console.log('Final Result: ' + result.exit_status);
+    });
+
+    goal.send()
+  }
+
+
 }
