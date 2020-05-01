@@ -13,7 +13,7 @@ function init() {
     
   var odomCapClient = new ROSLIB.ActionClient({
     ros : ros,
-    serverName : '/odom_capture',
+    serverName : '/ros_gui_server/odom_capture',
     actionName : 'ros_gui_server/OdomCaptureAction'
   });
 
@@ -58,6 +58,14 @@ function init() {
     frameID : '/base_link',
     rootObject : viewer.scene,
     loader : ROS3D.COLLADA_LOADER_2
+  });
+
+      // Setup the marker client.
+  var markerClient = new ROS3D.MarkerClient({
+    ros : ros,
+    tfClient : tfClient,
+    topic : '/ros_gui_server/marker_server',
+    rootObject : viewer.scene
   });
 
   ros.on('connection', function() {
@@ -112,8 +120,6 @@ function init() {
     });
 
     goal.send()
-
-    // Setting up markers
   }
 
 }
