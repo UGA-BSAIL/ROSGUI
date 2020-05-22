@@ -66,7 +66,7 @@ function init() {
   var urdfClient = new ROS3D.UrdfClient({
     ros : ros,
     tfClient : tfClient,
-    path : 'http://localhost/',
+    path : 'http://localhost/urdf',
     frameID : '/base_link',
     rootObject : viewer.scene,
     loader : ROS3D.COLLADA_LOADER_2
