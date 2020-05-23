@@ -19,3 +19,16 @@ the client, simply enter http://localhost/gui.
 The above instructions should bring up the ROS GUI webpage, at which point you'll need to enter the IP of the robot and press 'connect'. 
 After that, you'll need to select the Odometry topic you want the client to use, and press 'select Odometry', at which point, you'll be
 ready to go!
+
+#### Capture Position
+
+The capture position button records the latest /nav_msgs/Odometry message and stores it as well as a visualization_msgs/Point
+message for serving the rviz markers. The captured Odometry messages are used while executing /move_base/ actions.
+
+#### Move to Markers
+
+The move to markers button starts the execution loop for using the /move_base/ command to move the robot to a desired PoseStamped position. It reads from an array of the currently captured nav_msgs/Odometry messages and creates/sends a /move_base/ goal for each one, waiting for the current goal to be completed before executing the next one.
+
+#### Clear Markers
+
+This button simply clears the nav_msgs/Odometry array, the visialization_msgs/Point array, and publishes those changes to the client, clearing the markers from the visualization window.
