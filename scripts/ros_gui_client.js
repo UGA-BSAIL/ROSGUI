@@ -121,6 +121,8 @@ function init() {
       loader : ROS3D.COLLADA_LOADER_2
     });
 
+    updateOdomTopics();
+
   }
 
   // Odometry Topic Select Handler
