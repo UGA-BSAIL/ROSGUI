@@ -1,16 +1,19 @@
+// Updated X, Y, and Z values from Odometry, list of Odometry Topics, ros connection variable
+var x;
+var y;
+var z;
+var odomtopics = [];
+var ros;
 
 // ROS setup
 function init() {
 
-  // Updated X, Y, and Z values from Odometry
-  var x;
-  var y;
-  var z;
-
-  var ros = new ROSLIB.Ros({
+  ros = new ROSLIB.Ros({
     url : 'ws://localhost:9090'
   });
-    
+
+  updateOdomTopics();
+  
   var odomCapClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : '/ros_gui_server/odom_capture',
@@ -31,7 +34,7 @@ function init() {
 
   var odomsub = new ROSLIB.Topic({
     ros : ros,
-    name : '/odometry/filtered',
+    name : '/odom',
     messageType : 'nav_msgs/Odometry'
   });
 
@@ -56,7 +59,7 @@ function init() {
 
   var odometry = new ROS3D.Odometry({
     ros: ros,
-    topic: '/odometry/filtered',
+    topic: '/odom',
     tfClient: tfClient,
     rootObject: viewer.scene,
     color: 0xe62222,
@@ -72,7 +75,7 @@ function init() {
     loader : ROS3D.COLLADA_LOADER_2
   });
 
-      // Setup the marker client.
+  // Setup the marker client.
   var markerClient = new ROS3D.MarkerClient({
     ros : ros,
     tfClient : tfClient,
@@ -118,6 +121,43 @@ function init() {
       loader : ROS3D.COLLADA_LOADER_2
     });
 
+  }
+
+  // Odometry Topic Select Handler
+  document.getElementById("selectOdometry").onclick = function(){
+    
+    var select = document.getElementById("odomtopics");
+    var i = select.selectedindex;
+    var selectedTopic = select.options.item(i).text;
+
+    // Unsubscribe from current topics
+    odomsub.unsubscribe();
+    odometry.unsubscribe();
+
+    odometry = new ROS3D.Odometry({
+      ros: ros,
+      topic: selectedTopic,
+      tfClient: tfClient,
+      rootObject: viewer.scene,
+      color: 0xe62222,
+      keep: 5
+    });
+
+    odomsub = new ROSLIB.Topic({
+      ros : ros,
+      name : selectedTopic,
+      messageType : 'nav_msgs/Odometry'
+    });
+
+    // odomsub Callback handler
+    odomsub.subscribe(function(message) {
+      x = message.pose.pose.position.x;
+      y = message.pose.pose.position.y;
+      z = message.pose.pose.position.z;
+      document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
+      document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
+      document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
+    });
   }
 
   // Capture Handler
@@ -183,5 +223,31 @@ function init() {
     goal.send()
   }
 
+}
 
+// updates the Odometry Topic drop-down list
+function updateOdomTopics()
+{
+  var i;
+
+  // Update Odometry Topic list
+  ros.getTopicsForType('nav_msgs/Odometry', function(topics) {
+    
+    odomtopics = Object.values(topics);
+
+    console.log('Returned Odometry Topics: ' + odomtopics);
+
+    var select = document.getElementById("odomtopics");
+
+    // Add the new elements
+    for (i = 0; i < odomtopics.length; i++)
+    {
+      var addtopic = document.createElement("option");
+
+      addtopic.text = odomtopics[i];
+      addtopic.value = odomtopics[i];
+  
+      select.options.add(addtopic, i);
+    }
+  });
 }
