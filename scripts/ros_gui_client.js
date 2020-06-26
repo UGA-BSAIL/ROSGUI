@@ -34,7 +34,7 @@ function init() {
 
   var odomsub = new ROSLIB.Topic({
     ros : ros,
-    name : '/odom',
+    name : '/odometry/filtered',
     messageType : 'nav_msgs/Odometry'
   });
 
@@ -59,7 +59,7 @@ function init() {
 
   var odometry = new ROS3D.Odometry({
     ros: ros,
-    topic: '/odom',
+    topic: '/odometry/filtered',
     tfClient: tfClient,
     rootObject: viewer.scene,
     color: 0xe62222,
@@ -115,7 +115,7 @@ function init() {
     urdfClient = new ROS3D.UrdfClient({
       ros : ros,
       tfClient : tfClient,
-      path : url,
+      path : url + "/urdf",
       frameID : '/base_link',
       rootObject : viewer.scene,
       loader : ROS3D.COLLADA_LOADER_2
