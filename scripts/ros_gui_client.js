@@ -3,42 +3,53 @@ var x;
 var y;
 var z;
 var odomtopics = [];
+var ip = 'localhost';
+var odometrytopic = '/odometry/filtered';
 var ros;
+var odomCapClient;
+var clearMarkersClient;
+var moveToMarkersClient;
+var odomsub;
+var viewer;
+var tfClient;
+var odometry;
+var urdfClient;
+var markerClient;
 
 // ROS setup
 function init() {
 
   ros = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
+    url : 'ws://' + ip + ':9090'
   });
 
   updateOdomTopics();
   
-  var odomCapClient = new ROSLIB.ActionClient({
+  odomCapClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : '/ros_gui_server/odom_capture',
     actionName : 'ros_gui_server/OdomCaptureAction'
   });
 
-  var clearMarkersClient = new ROSLIB.ActionClient({
+  clearMarkersClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : '/ros_gui_server/odom_clear',
     actionName : 'ros_gui_server/OdomClearAction'
   });
 
-  var moveToMarkersClient = new ROSLIB.ActionClient({
+  moveToMarkersClient = new ROSLIB.ActionClient({
     ros : ros,
     serverName : '/ros_gui_server/move_to_markers',
     actionName : 'ros_gui_server/MoveToMarkersAction'
   });
 
-  var odomsub = new ROSLIB.Topic({
+  odomsub = new ROSLIB.Topic({
     ros : ros,
-    name : '/odometry/filtered',
+    name : odometrytopic,
     messageType : 'nav_msgs/Odometry'
   });
 
-  var viewer = new ROS3D.Viewer({
+  viewer = new ROS3D.Viewer({
     divID : 'markers',
     displayPanAndZoomFrame : false,
     width : '1280',
@@ -50,33 +61,33 @@ function init() {
   // Add a grid.
   viewer.addObject(new ROS3D.Grid({num_cells : 30}));
 
-  var tfClient = new ROSLIB.TFClient({
+  tfClient = new ROSLIB.TFClient({
     ros : ros,
     fixedFrame : '/odom',
     angularThres : 0.01,
     transThres : 0.01
   });
 
-  var odometry = new ROS3D.Odometry({
+  odometry = new ROS3D.Odometry({
     ros: ros,
-    topic: '/odometry/filtered',
+    topic: odometrytopic,
     tfClient: tfClient,
     rootObject: viewer.scene,
     color: 0xe62222,
     keep: 5
   });
 
-  var urdfClient = new ROS3D.UrdfClient({
+  urdfClient = new ROS3D.UrdfClient({
     ros : ros,
     tfClient : tfClient,
-    path : 'http://localhost/urdf',
+    path : 'http://' + ip + '/urdf',
     frameID : '/base_link',
     rootObject : viewer.scene,
     loader : ROS3D.COLLADA_LOADER_2
   });
 
   // Setup the marker client.
-  var markerClient = new ROS3D.MarkerClient({
+  markerClient = new ROS3D.MarkerClient({
     ros : ros,
     tfClient : tfClient,
     topic : '/ros_gui_server/marker_server',
@@ -95,33 +106,16 @@ function init() {
     console.log('Connection to websocket server closed.');
   });
 
-  // odomsub Callback handler
-  odomsub.subscribe(function(message) {
-    x = message.pose.pose.position.x;
-    y = message.pose.pose.position.y;
-    z = message.pose.pose.position.z;
-    document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
-    document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
-    document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
-  });
-
   // Reconnect Handler
   document.getElementById("connectButton").onclick = function(){
 
-    var url = document.getElementById("url-box").value;
+    ip = document.getElementById("url-box").value;
 
-    ros.connect("ws://" + url + ":9090");
-    
-    urdfClient = new ROS3D.UrdfClient({
-      ros : ros,
-      tfClient : tfClient,
-      path : url + "/urdf",
-      frameID : '/base_link',
-      rootObject : viewer.scene,
-      loader : ROS3D.COLLADA_LOADER_2
-    });
+    // Severe ROS connection
+    ros.close()
 
-    updateOdomTopics();
+    // Reinitialize the GUI
+    reinit()
 
   }
 
@@ -132,34 +126,19 @@ function init() {
     var i = select.selectedindex;
     var selectedTopic = select.options.item(i).text;
 
-    // Unsubscribe from current topics
+    // Severe ROS connection
+    odomCapClient.dispose();
+    clearMarkersClient.dispose();
+    moveToMarkersClient.dispose();
     odomsub.unsubscribe();
     odometry.unsubscribe();
+    tfClient.dispose();
+    ros.close()
 
-    odometry = new ROS3D.Odometry({
-      ros: ros,
-      topic: selectedTopic,
-      tfClient: tfClient,
-      rootObject: viewer.scene,
-      color: 0xe62222,
-      keep: 5
-    });
+    // Reinitialize the GUI
+    reinit()
 
-    odomsub = new ROSLIB.Topic({
-      ros : ros,
-      name : selectedTopic,
-      messageType : 'nav_msgs/Odometry'
-    });
 
-    // odomsub Callback handler
-    odomsub.subscribe(function(message) {
-      x = message.pose.pose.position.x;
-      y = message.pose.pose.position.y;
-      z = message.pose.pose.position.z;
-      document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
-      document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
-      document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
-    });
   }
 
   // Capture Handler
@@ -225,6 +204,107 @@ function init() {
     goal.send()
   }
 
+  // odomsub Callback handler
+  odomsub.subscribe(function(message) {
+    x = message.pose.pose.position.x;
+    y = message.pose.pose.position.y;
+    z = message.pose.pose.position.z;
+    document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
+    document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
+    document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
+  });
+}
+
+// ROS setup
+function reinit() {
+
+  ros = new ROSLIB.Ros({
+    url : 'ws://' + ip + ':9090'
+  });
+
+  updateOdomTopics();
+  
+  odomCapClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : '/ros_gui_server/odom_capture',
+    actionName : 'ros_gui_server/OdomCaptureAction'
+  });
+
+  clearMarkersClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : '/ros_gui_server/odom_clear',
+    actionName : 'ros_gui_server/OdomClearAction'
+  });
+
+  moveToMarkersClient = new ROSLIB.ActionClient({
+    ros : ros,
+    serverName : '/ros_gui_server/move_to_markers',
+    actionName : 'ros_gui_server/MoveToMarkersAction'
+  });
+
+  odomsub = new ROSLIB.Topic({
+    ros : ros,
+    name : odometrytopic,
+    messageType : 'nav_msgs/Odometry'
+  });
+
+  // Add a grid.
+  viewer.addObject(new ROS3D.Grid({num_cells : 30}));
+
+  tfClient = new ROSLIB.TFClient({
+    ros : ros,
+    fixedFrame : '/odom',
+    angularThres : 0.01,
+    transThres : 0.01
+  });
+
+  odometry = new ROS3D.Odometry({
+    ros: ros,
+    topic: odometrytopic,
+    tfClient: tfClient,
+    rootObject: viewer.scene,
+    color: 0xe62222,
+    keep: 5
+  });
+
+  urdfClient = new ROS3D.UrdfClient({
+    ros : ros,
+    tfClient : tfClient,
+    path : 'http://' + ip + '/urdf',
+    frameID : '/base_link',
+    rootObject : viewer.scene,
+    loader : ROS3D.COLLADA_LOADER_2
+  });
+
+  // Setup the marker client.
+  markerClient = new ROS3D.MarkerClient({
+    ros : ros,
+    tfClient : tfClient,
+    topic : '/ros_gui_server/marker_server',
+    rootObject : viewer.scene
+  });
+
+  ros.on('connection', function() {
+    console.log('Connected to websocket server.');
+  });
+    
+  ros.on('error', function(error) {
+    console.log('Error connecting to websocket server: ', error);
+  });
+    
+  ros.on('close', function() {
+    console.log('Connection to websocket server closed.');
+  });
+
+  // odomsub Callback handler
+  odomsub.subscribe(function(message) {
+    x = message.pose.pose.position.x;
+    y = message.pose.pose.position.y;
+    z = message.pose.pose.position.z;
+    document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
+    document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
+    document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
+  });
 }
 
 // updates the Odometry Topic drop-down list
@@ -234,7 +314,7 @@ function updateOdomTopics()
 
   // Update Odometry Topic list
   ros.getTopicsForType('nav_msgs/Odometry', function(topics) {
-    
+      
     odomtopics = Object.values(topics);
 
     console.log('Returned Odometry Topics: ' + odomtopics);
@@ -248,8 +328,10 @@ function updateOdomTopics()
 
       addtopic.text = odomtopics[i];
       addtopic.value = odomtopics[i];
-  
-      select.options.add(addtopic, i);
+    
+        select.options.add(addtopic, i);
     }
+
   });
+  
 }
