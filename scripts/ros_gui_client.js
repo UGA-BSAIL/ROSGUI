@@ -248,9 +248,6 @@ function reinit() {
     messageType : 'nav_msgs/Odometry'
   });
 
-  // Add a grid.
-  viewer.addObject(new ROS3D.Grid({num_cells : 30}));
-
   tfClient = new ROSLIB.TFClient({
     ros : ros,
     fixedFrame : '/odom',
