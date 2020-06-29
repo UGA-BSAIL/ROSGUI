@@ -55,7 +55,7 @@ function init() {
     width : '1280',
     height : '720',
     antialias : true,
-    background : '#949699'
+    background : '#222324'
   });
 
   // Add a grid.
@@ -83,7 +83,7 @@ function init() {
     path : 'http://' + ip + '/urdf',
     frameID : '/base_link',
     rootObject : viewer.scene,
-    loader : ROS3D.COLLADA_LOADER_2
+    loader : ROS3D.COLLADA_LOADER
   });
 
   // Setup the marker client.
