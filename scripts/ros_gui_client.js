@@ -4,7 +4,7 @@ var y;
 var z;
 var odomtopics = [];
 var ip = 'localhost';
-var odometrytopic = '/odometry/filtered';
+var odometrytopic;
 var ros;
 var odomCapClient;
 var clearMarkersClient;
@@ -123,21 +123,25 @@ function init() {
   document.getElementById("selectOdometry").onclick = function(){
     
     var select = document.getElementById("odomtopics");
-    var i = select.selectedindex;
-    var selectedTopic = select.options.item(i).text;
+    var i = select.selectedIndex;
+    odometrytopic = select.options.item(i).text;
 
-    // Severe ROS connection
-    odomCapClient.dispose();
-    clearMarkersClient.dispose();
-    moveToMarkersClient.dispose();
+    // Change odometry topic
     odomsub.unsubscribe();
-    odometry.unsubscribe();
-    tfClient.dispose();
-    ros.close()
+    odomsub.name = odometrytopic;
+    odomsub.subscribe(function(message){
+      x = message.pose.pose.position.x;
+      y = message.pose.pose.position.y;
+      z = message.pose.pose.position.z;
+      document.getElementById("captureTextX").innerHTML = "X: " + x.toFixed(9);
+      document.getElementById("captureTextY").innerHTML = "Y: " + y.toFixed(9);
+      document.getElementById("captureTextZ").innerHTML = "Z: " + z.toFixed(9);
+    });
 
-    // Reinitialize the GUI
-    reinit()
-
+    // Reinit the ros3djs Odometry object
+    odometry.topicName = odometrytopic;
+    odometry.unsubscribe()
+    odometry.subscribe()
 
   }
 
